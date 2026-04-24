@@ -42,6 +42,7 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket 
   const [isSending, setIsSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const formatLastSeen = (dateString: string | null | undefined) => {
     if (!dateString) return "a while ago";
@@ -117,16 +118,28 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket 
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim() || !conversationId) return;
+    if ((!inputValue.trim() && !selectedFile) || !conversationId) return;
 
     setIsSending(true);
     try {
-      await api.post("/messages/send-text", {
-        conversationId,
-        body: inputValue,
-      });
+      if (selectedFile) {
+        const formData = new FormData();
+        formData.append("conversationId", conversationId);
+        if (inputValue.trim()) formData.append("body", inputValue);
+        formData.append("file", selectedFile);
+
+        await api.post("/messages/send-file", formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        await api.post("/messages/send-text", {
+          conversationId,
+          body: inputValue,
+        });
+      }
 
       setInputValue("");
+      setSelectedFile(null);
       
       if (socket && receiverId) {
         socket.emit("stop_typing", { receiverId, conversationId });
@@ -263,7 +276,22 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket 
       </main>
 
       {/* ── Input Area ── */}
-      <footer className="flex-shrink-0 px-4 py-3 border-t border-surface-700/50 bg-surface-900/80 backdrop-blur-sm">
+      <footer className="flex-shrink-0 px-4 py-3 border-t border-surface-700/50 bg-surface-900/80 backdrop-blur-sm flex flex-col gap-2">
+        {selectedFile && (
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-surface-800 rounded-lg w-max border border-surface-700/50">
+            <Paperclip size={14} className="text-surface-400" />
+            <span className="text-sm text-surface-300 truncate max-w-[200px]">
+              {selectedFile.name}
+            </span>
+            <button 
+              type="button"
+              onClick={() => setSelectedFile(null)}
+              className="text-red-400 hover:text-red-300 ml-2 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        )}
         <form
           onSubmit={handleSend}
           className="flex items-center gap-2 bg-surface-800 rounded-2xl px-3 py-2 border border-surface-700/50 focus-within:border-brand-500/50 transition-all"
@@ -279,11 +307,11 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket 
           <input 
             type="file" 
             ref={fileInputRef} 
-            accept="image/*,video/*" 
+            accept="image/*,video/*,.pdf,.doc,.docx" 
             className="hidden" 
             onChange={(e) => {
               if (e.target.files && e.target.files[0]) {
-                console.log("File selected:", e.target.files[0].name);
+                setSelectedFile(e.target.files[0]);
               }
             }}
           />
@@ -330,7 +358,7 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket 
 
           <button
             type="submit"
-            disabled={!inputValue.trim() || isSending}
+            disabled={(!inputValue.trim() && !selectedFile) || isSending}
             className="w-8 h-8 rounded-full bg-brand-600 hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all flex-shrink-0"
             aria-label="Send message"
           >
