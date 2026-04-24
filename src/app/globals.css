@@ -1,64 +1,138 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-* {
+@theme inline {
+  /* ── Brand Colors ── */
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-400: #818cf8;
+
+  /* ── Slate Surface Colors ── */
+  --color-surface-950: #0b0d14;
+  --color-surface-900: #111827;
+  --color-surface-800: #1a2030;
+  --color-surface-700: #252d3d;
+  --color-surface-600: #334155;
+  --color-surface-500: #475569;
+  --color-surface-400: #94a3b8;
+  --color-surface-300: #cbd5e1;
+  --color-surface-200: #e2e8f0;
+
+  /* ── Message Bubble ── */
+  --color-bubble-out: #4f46e5;
+  --color-bubble-in: #1e2533;
+
+  /* ── Status ── */
+  --color-online: #22c55e;
+  --color-away: #eab308;
+
+  /* ── Fonts ── */
+  --font-sans: var(--font-geist-sans), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+
+  /* ── Radii ── */
+  --radius-bubble: 1.25rem;
+  --radius-card: 1.5rem;
+
+  /* ── Shadows ── */
+  --shadow-glow: 0 0 40px -8px rgba(99, 102, 241, 0.45);
+  --shadow-card: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+}
+
+/* ─── Base ─────────────────────────────────────── */
+*,
+*::before,
+*::after {
   box-sizing: border-box;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 html,
 body {
   height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-
-body {
-  background-color: rgb(15, 23, 42);
-  color: white;
   margin: 0;
   padding: 0;
+  background-color: #0b0d14;
+  color: #e2e8f0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar Styling */
+/* ─── Custom Scrollbar ──────────────────────────── */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 5px;
+  height: 5px;
 }
-
 ::-webkit-scrollbar-track {
-  background: rgb(30, 41, 59);
+  background: transparent;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgb(71, 85, 105);
-  border-radius: 4px;
+  background: #334155;
+  border-radius: 99px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgb(100, 116, 139);
+  background: #475569;
 }
 
-/* Utility Classes */
-.scrollbar-hide {
-  -ms-overflow-style: none;
+/* ─── Keyframes ─────────────────────────────────── */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes slide-in-left {
+  from { transform: translateX(-100%); opacity: 0; }
+  to   { transform: translateX(0);     opacity: 1; }
+}
+
+/* ─── Utility Classes ───────────────────────────── */
+.animate-fade-in-up    { animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-scale-in      { animation: scaleIn  0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slide-right   { animation: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.animate-slide-left    { animation: slide-in-left  0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
+
+.glass {
+  background: rgba(26, 32, 48, 0.75);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.glow-border {
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.3),
+              0 0 40px -8px rgba(99, 102, 241, 0.4);
+}
+
+.scrollbar-hidden {
   scrollbar-width: none;
 }
-
-.scrollbar-hide::-webkit-scrollbar {
+.scrollbar-hidden::-webkit-scrollbar {
   display: none;
-}
-
-/* Glass Morphism */
-.glass {
-  background: rgba(30, 41, 59, 0.5);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(71, 85, 105, 0.3);
-}
-
-/* Gradient Background */
-.gradient-bg {
-  background: linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(15, 23, 42) 50%, rgb(30, 41, 59) 100%);
 }
