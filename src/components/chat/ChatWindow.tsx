@@ -11,6 +11,7 @@ import {
   Smile,
   Send,
   MoreHorizontal,
+  Loader2,
 } from "lucide-react";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useMessages } from "@/hooks/useMessages";
@@ -23,9 +24,10 @@ import EmptyChat from "./EmptyChat";
 interface ChatWindowProps {
   conversationId: string | null;
   onBack: () => void;
+  socket: any;
 }
 
-export default function ChatWindow({ conversationId, onBack }: ChatWindowProps) {
+export default function ChatWindow({ conversationId, onBack, socket }: ChatWindowProps) {
   const { data: session } = authClient.useSession();
   const { data: messages, isLoading } = useMessages(conversationId);
   const { data: conversations } = useConversations();
@@ -56,6 +58,26 @@ export default function ChatWindow({ conversationId, onBack }: ChatWindowProps) 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Listen to new messages
+  useEffect(() => {
+    if (!socket || !conversationId) return;
+
+    const handleNewMessage = (newMessage: any) => {
+      if (newMessage.conversationId === conversationId) {
+        queryClient.setQueryData(["messages", conversationId], (oldMessages: any) => {
+          if (!oldMessages) return [newMessage];
+          return [...oldMessages, newMessage]; 
+        });
+      }
+    };
+
+    socket.on("new_message", handleNewMessage);
+
+    return () => {
+      socket.off("new_message", handleNewMessage);
+    };
+  }, [socket, conversationId, queryClient]);
 
   if (!conversationId) {
     return <EmptyChat />;
@@ -147,7 +169,22 @@ export default function ChatWindow({ conversationId, onBack }: ChatWindowProps) 
         </div>
 
         {isLoading ? (
-          <div className="text-center text-surface-400 mt-4 animate-pulse">Loading messages...</div>
+          <div className="flex flex-col gap-4 mt-4 px-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div 
+                key={i} 
+                className={`flex w-full ${i % 2 === 0 ? "justify-start" : "justify-end"}`}
+              >
+                <div 
+                  className={`h-12 w-2/3 sm:w-1/2 rounded-2xl animate-pulse ${
+                    i % 2 === 0 
+                      ? "bg-surface-800 rounded-bl-none" 
+                      : "bg-surface-700/50 rounded-br-none"
+                  }`} 
+                />
+              </div>
+            ))}
+          </div>
         ) : (
           messages?.map((msg: any) => {
              const isMe = msg.sender?.id === session?.user?.id;
@@ -234,7 +271,11 @@ export default function ChatWindow({ conversationId, onBack }: ChatWindowProps) 
             className="w-8 h-8 rounded-full bg-brand-600 hover:bg-brand-500 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all flex-shrink-0"
             aria-label="Send message"
           >
-            <Send size={15} className="text-white translate-x-px" />
+            {isSending ? (
+              <Loader2 size={15} className="text-white animate-spin" />
+            ) : (
+              <Send size={15} className="text-white translate-x-px" />
+            )}
           </button>
         </form>
       </footer>

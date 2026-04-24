@@ -14,7 +14,7 @@ import { useSocket } from "@/hooks/useSocket";
 export default function ChatPage() {
   const router = useRouter();
   const { data: session } = authClient.useSession();
-  useSocket(session?.user?.id);
+  const socket = useSocket(session?.user?.id);
 
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   // mobile: "sidebar" | "window"
@@ -86,6 +86,7 @@ export default function ChatPage() {
           <ChatWindow
             conversationId={activeConvId}
             onBack={handleBack}
+            socket={socket}
           />
         ) : (
           <EmptyChat />
