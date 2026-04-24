@@ -1,5 +1,64 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
 
 body {
-  @apply bg-dark text-white; 
+  background-color: rgb(15, 23, 42);
+  color: white;
+  margin: 0;
+  padding: 0;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(30, 41, 59);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(71, 85, 105);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(100, 116, 139);
+}
+
+/* Utility Classes */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Glass Morphism */
+.glass {
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+}
+
+/* Gradient Background */
+.gradient-bg {
+  background: linear-gradient(135deg, rgb(15, 23, 42) 0%, rgb(15, 23, 42) 50%, rgb(30, 41, 59) 100%);
 }
