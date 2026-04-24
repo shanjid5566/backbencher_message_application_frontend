@@ -1,23 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Avatar from "@/components/ui/Avatar";
 import { ONLINE_USERS } from "@/lib/mock-data";
 import { Search, Loader2 } from "lucide-react";
 import { useConversations } from "@/hooks/useConversations";
 import { useSearchUsers } from "@/hooks/useSearchUsers";
 import api from "@/lib/axios";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ChatSidebarProps {
   activeId: string | null;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, partnerId?: string) => void;
+  socket?: any;
 }
 
 export default function ChatSidebar({
   activeId,
   onSelect,
+  socket,
 }: ChatSidebarProps) {
   const { data: conversations, isLoading, isError } = useConversations();
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleUserStatusChange = ({ userId, isOnline, lastSeen }: any) => {
+      queryClient.setQueryData(['conversations'], (oldConversations: any) => {
+        if (!oldConversations) return oldConversations;
+
+        return oldConversations.map((conv: any) => ({
+          ...conv,
+          users: conv.users.map((user: any) => 
+            user.id === userId ? { ...user, isOnline, lastSeen } : user
+          )
+        }));
+      });
+    };
+
+    socket.on("user_status_changed", handleUserStatusChange);
+
+    return () => {
+      socket.off("user_status_changed", handleUserStatusChange);
+    };
+  }, [socket, queryClient]);
   const [searchQuery, setSearchQuery] = useState("");
   const { data: searchResults, isLoading: isSearching } = useSearchUsers(searchQuery);
   const [isCreatingChat, setIsCreatingChat] = useState(false);
@@ -177,7 +204,7 @@ export default function ChatSidebar({
               return (
                 <li key={conv.id} style={{ animationDelay: `${idx * 40}ms` }} className="animate-fade-in-up">
                   <button
-                    onClick={() => onSelect(conv.id)}
+                    onClick={() => onSelect(conv.id, partner.id)}
                     className={`
                       w-full flex items-center gap-3 px-3 py-3 rounded-xl 
                       transition-all duration-150 text-left group

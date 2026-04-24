@@ -23,11 +23,12 @@ import EmptyChat from "./EmptyChat";
 
 interface ChatWindowProps {
   conversationId: string | null;
+  receiverId: string | null;
   onBack: () => void;
   socket: any;
 }
 
-export default function ChatWindow({ conversationId, onBack, socket }: ChatWindowProps) {
+export default function ChatWindow({ conversationId, receiverId, onBack, socket }: ChatWindowProps) {
   const { data: session } = authClient.useSession();
   const { data: messages, isLoading } = useMessages(conversationId);
   const { data: conversations } = useConversations();
@@ -39,6 +40,22 @@ export default function ChatWindow({ conversationId, onBack, socket }: ChatWindo
   const [inputValue, setInputValue] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const [isSending, setIsSending] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const formatLastSeen = (dateString: string | null | undefined) => {
+    if (!dateString) return "a while ago";
+    try {
+      const date = new Date(dateString);
+      const isToday = new Date().toDateString() === date.toDateString();
+      if (isToday) {
+        return `today at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+      }
+      return `${date.toLocaleDateString([], { month: 'short', day: 'numeric' })} at ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } catch (e) {
+      return "a while ago";
+    }
+  };
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -59,7 +76,7 @@ export default function ChatWindow({ conversationId, onBack, socket }: ChatWindo
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Listen to new messages
+  // Listen to new messages and typing status
   useEffect(() => {
     if (!socket || !conversationId) return;
 
@@ -72,10 +89,22 @@ export default function ChatWindow({ conversationId, onBack, socket }: ChatWindo
       }
     };
 
+    const handleTyping = (data: any) => {
+      if (data.conversationId === conversationId) setIsTyping(true);
+    };
+
+    const handleStopTyping = (data: any) => {
+      if (data.conversationId === conversationId) setIsTyping(false);
+    };
+
     socket.on("new_message", handleNewMessage);
+    socket.on("user_typing", handleTyping);
+    socket.on("user_stopped_typing", handleStopTyping);
 
     return () => {
       socket.off("new_message", handleNewMessage);
+      socket.off("user_typing", handleTyping);
+      socket.off("user_stopped_typing", handleStopTyping);
     };
   }, [socket, conversationId, queryClient]);
 
@@ -98,6 +127,11 @@ export default function ChatWindow({ conversationId, onBack, socket }: ChatWindo
       });
 
       setInputValue("");
+      
+      if (socket && receiverId) {
+        socket.emit("stop_typing", { receiverId, conversationId });
+      }
+
       queryClient.invalidateQueries({ queryKey: ["messages", conversationId] });
       queryClient.invalidateQueries({ queryKey: ["conversations"] });
     } catch (error) {
@@ -144,7 +178,7 @@ export default function ChatWindow({ conversationId, onBack, socket }: ChatWindo
                     Active now
                   </span>
                 ) : (
-                  `Last seen ${partner.lastSeen ?? "a while ago"}`
+                  `Last seen ${formatLastSeen(partner.lastSeen)}`
                 )}
               </p>
             </div>
@@ -204,6 +238,27 @@ export default function ChatWindow({ conversationId, onBack, socket }: ChatWindo
           })
         )}
 
+        {isTyping && partner && (
+          <div className="flex items-end gap-2 mt-2 animate-fade-in-up">
+            <Avatar 
+              user={{...partner} as any} 
+              size="sm" 
+            />
+            <div className="bg-surface-800 rounded-t-2xl rounded-br-2xl rounded-bl-md px-4 py-3 flex gap-1 items-center">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="w-1.5 h-1.5 rounded-full bg-surface-500"
+                  style={{
+                    animation: "pulse-dot 1.2s ease-in-out infinite",
+                    animationDelay: `${i * 0.2}s`,
+                  }}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </main>
 
@@ -236,7 +291,15 @@ export default function ChatWindow({ conversationId, onBack, socket }: ChatWindo
           <input
             type="text"
             value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              if (!socket || !receiverId) return;
+              socket.emit("typing", { receiverId, conversationId });
+              if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+              typingTimeoutRef.current = setTimeout(() => {
+                socket.emit("stop_typing", { receiverId, conversationId });
+              }, 2000);
+            }}
             disabled={isSending}
             placeholder="Type a message..."
             className="flex-1 bg-transparent text-sm text-surface-200 placeholder:text-surface-500 outline-none py-1"

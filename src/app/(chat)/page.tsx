@@ -17,6 +17,7 @@ export default function ChatPage() {
   const socket = useSocket(session?.user?.id);
 
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
+  const [activePartnerId, setActivePartnerId] = useState<string | null>(null);
   // mobile: "sidebar" | "window"
   const [mobileView, setMobileView] = useState<"sidebar" | "window">(
     "sidebar"
@@ -24,8 +25,9 @@ export default function ChatPage() {
 
   const activeConversation = CONVERSATIONS.find((c) => c.id === activeConvId);
 
-  const handleSelectConversation = (id: string) => {
+  const handleSelectConversation = (id: string, partnerId?: string) => {
     setActiveConvId(id);
+    if (partnerId) setActivePartnerId(partnerId);
     setMobileView("window");
   };
 
@@ -51,6 +53,7 @@ export default function ChatPage() {
           <ChatSidebar
             activeId={activeConvId}
             onSelect={handleSelectConversation}
+            socket={socket}
           />
         </div>
 
@@ -85,6 +88,7 @@ export default function ChatPage() {
         {activeConvId ? (
           <ChatWindow
             conversationId={activeConvId}
+            receiverId={activePartnerId}
             onBack={handleBack}
             socket={socket}
           />
