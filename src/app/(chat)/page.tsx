@@ -44,7 +44,6 @@ export default function ChatPage() {
         {/* Sidebar content */}
         <div className="flex-1 overflow-hidden">
           <ChatSidebar
-            conversations={CONVERSATIONS}
             activeId={activeConvId}
             onSelect={handleSelectConversation}
           />
