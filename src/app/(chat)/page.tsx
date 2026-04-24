@@ -6,10 +6,12 @@ import { CONVERSATIONS, CURRENT_USER } from "@/lib/mock-data";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import EmptyChat from "@/components/chat/EmptyChat";
+import CallWindow from "@/components/CallWindow";
 import Avatar from "@/components/ui/Avatar";
 import { LogOut } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useSocket } from "@/hooks/useSocket";
+import { useVideoCall } from "@/hooks/useVideoCall";
 
 export default function ChatPage() {
   const router = useRouter();
@@ -18,6 +20,18 @@ export default function ChatPage() {
 
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   const [activePartnerId, setActivePartnerId] = useState<string | null>(null);
+
+  const {
+    isReceivingCall,
+    isCallAccepted,
+    callerInfo,
+    localVideoRef,
+    remoteVideoRef,
+    initiateCall,
+    acceptCall,
+    rejectCall,
+    endCall
+  } = useVideoCall(socket, session?.user?.id, session?.user?.name);
   // mobile: "sidebar" | "window"
   const [mobileView, setMobileView] = useState<"sidebar" | "window">(
     "sidebar"
@@ -36,7 +50,19 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-surface-950">
+    <div className="flex h-screen overflow-hidden bg-surface-950 relative">
+
+      <CallWindow 
+        isReceivingCall={isReceivingCall}
+        isCallAccepted={isCallAccepted}
+        callerName={callerInfo?.name}
+        localVideoRef={localVideoRef}
+        remoteVideoRef={remoteVideoRef}
+        onAcceptCall={acceptCall}
+        onRejectCall={rejectCall}
+        onEndCall={endCall}
+      />
+
       {/* ══════════════════════════════════════════
           LEFT SIDEBAR
           ══════════════════════════════════════════ */}
@@ -91,6 +117,7 @@ export default function ChatPage() {
             receiverId={activePartnerId}
             onBack={handleBack}
             socket={socket}
+            onStartVideoCall={() => activePartnerId && initiateCall(activePartnerId)}
           />
         ) : (
           <EmptyChat />
