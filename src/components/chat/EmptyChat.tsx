@@ -4,7 +4,7 @@ import { MessageCircle } from "lucide-react";
 
 export default function EmptyChat() {
   return (
-    <div className="flex-1 hidden md:flex flex-col items-center justify-center gap-5 bg-surface-950">
+    <div className="flex-1 w-full h-full hidden md:flex flex-col items-center justify-center gap-5 bg-surface-950">
       {/* Icon */}
       <div className="w-20 h-20 rounded-3xl bg-surface-800 border border-surface-700/50 flex items-center justify-center shadow-xl">
         <MessageCircle size={36} className="text-brand-400" strokeWidth={1.5} />

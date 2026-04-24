@@ -39,7 +39,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-surface-950 animate-slide-right md:animate-none">
+    <div className="flex flex-col flex-1 w-full h-full bg-surface-950 animate-slide-right md:animate-none">
       {/* ── Chat Header ── */}
       <header className="flex items-center gap-3 px-4 py-3 border-b border-surface-700/50 bg-surface-900/80 backdrop-blur-sm flex-shrink-0">
         {/* Back button (mobile only) */}
