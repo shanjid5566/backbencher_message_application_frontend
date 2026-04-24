@@ -21,26 +21,6 @@ export default function ChatSidebar({
       {/* ── Header ── */}
       <div className="flex items-center justify-between px-5 pt-6 pb-4">
         <h1 className="text-xl font-bold text-white tracking-tight">Messages</h1>
-        <button
-          className="w-8 h-8 rounded-full bg-surface-700 hover:bg-surface-600 flex items-center justify-center transition-colors"
-          aria-label="New message"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-surface-300"
-          >
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-        </button>
       </div>
 
       {/* ── Search ── */}
@@ -60,11 +40,22 @@ export default function ChatSidebar({
         <p className="text-[11px] font-semibold text-surface-500 uppercase tracking-widest mb-3">
           Active Now
         </p>
-        <div className="flex gap-4 overflow-x-auto scrollbar-hidden pb-1">
+        <div 
+          className="flex gap-4 overflow-x-auto scrollbar-hidden pb-1"
+          onWheel={(e) => {
+            if (e.deltaY !== 0) {
+              e.currentTarget.scrollLeft += e.deltaY;
+            }
+          }}
+        >
           {ONLINE_USERS.map((user) => (
             <button
               key={user.id}
-              className="flex flex-col items-center gap-1.5 flex-shrink-0 group"
+              onClick={() => {
+                const conv = conversations.find((c) => c.participant.id === user.id);
+                if (conv) onSelect(conv.id);
+              }}
+              className="flex flex-col items-center gap-1.5 shrink-0 group"
               aria-label={user.name}
             >
               <Avatar user={user} size="lg" showStatus />

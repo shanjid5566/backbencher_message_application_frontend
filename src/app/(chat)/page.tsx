@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CONVERSATIONS, CURRENT_USER } from "@/lib/mock-data";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
 import EmptyChat from "@/components/chat/EmptyChat";
 import Avatar from "@/components/ui/Avatar";
-import { Settings, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 export default function ChatPage() {
+  const router = useRouter();
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   // mobile: "sidebar" | "window"
   const [mobileView, setMobileView] = useState<"sidebar" | "window">(
@@ -58,12 +60,7 @@ export default function ChatPage() {
             <p className="text-[11px] text-online">Online</p>
           </div>
           <button
-            className="w-7 h-7 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors"
-            aria-label="Settings"
-          >
-            <Settings size={14} className="text-surface-400" />
-          </button>
-          <button
+            onClick={() => router.push("/login")}
             className="w-7 h-7 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors"
             aria-label="Log out"
           >

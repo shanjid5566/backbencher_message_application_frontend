@@ -9,12 +9,12 @@ import {
   ArrowLeft,
   Phone,
   Video,
-  Info,
   Paperclip,
   Smile,
   Send,
   MoreHorizontal,
 } from "lucide-react";
+import EmojiPicker, { Theme } from "emoji-picker-react";
 
 interface ChatWindowProps {
   conversation: Conversation;
@@ -24,7 +24,24 @@ interface ChatWindowProps {
 export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
   const { participant, messages } = conversation;
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const emojiRef = useRef<HTMLDivElement>(null);
   const [inputValue, setInputValue] = useState("");
+  const [showEmoji, setShowEmoji] = useState(false);
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiRef.current && !emojiRef.current.contains(event.target as Node)) {
+        setShowEmoji(false);
+      }
+    };
+
+    if (showEmoji) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showEmoji]);
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -73,7 +90,6 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         <div className="flex items-center gap-1">
           <ActionBtn icon={<Phone size={17} />} label="Voice call" />
           <ActionBtn icon={<Video size={17} />} label="Video call" />
-          <ActionBtn icon={<Info size={17} />} label="Info" />
           <ActionBtn icon={<MoreHorizontal size={17} />} label="More" />
         </div>
       </header>
@@ -124,11 +140,24 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           {/* Attachment */}
           <button
             type="button"
-            className="w-8 h-8 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors flex-shrink-0"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-8 h-8 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors shrink-0"
             aria-label="Attach file"
           >
             <Paperclip size={17} className="text-surface-400" />
           </button>
+          <input 
+            type="file" 
+            ref={fileInputRef} 
+            accept="image/*,video/*" 
+            className="hidden" 
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                // Future: handle file upload
+                console.log("File selected:", e.target.files[0].name);
+              }
+            }}
+          />
 
           {/* Text Input */}
           <input
@@ -140,13 +169,28 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
           />
 
           {/* Emoji */}
-          <button
-            type="button"
-            className="w-8 h-8 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors flex-shrink-0"
-            aria-label="Emoji"
-          >
-            <Smile size={17} className="text-surface-400" />
-          </button>
+          <div className="relative flex items-center justify-center" ref={emojiRef}>
+            <button
+              type="button"
+              onClick={() => setShowEmoji((prev) => !prev)}
+              className="w-8 h-8 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors shrink-0"
+              aria-label="Emoji"
+            >
+              <Smile size={17} className="text-surface-400" />
+            </button>
+            
+            {showEmoji && (
+              <div className="absolute bottom-12 right-[-20px] sm:right-0 z-50 animate-scale-in origin-bottom-right w-[300px] sm:w-[350px]">
+                <EmojiPicker 
+                  theme={Theme.DARK} 
+                  width="100%"
+                  onEmojiClick={(emojiObj) => {
+                    setInputValue((prev) => prev + emojiObj.emoji);
+                  }}
+                />
+              </div>
+            )}
+          </div>
 
           {/* Send */}
           <button
