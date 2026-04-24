@@ -41,8 +41,32 @@ export default function MessageBubble({ message, isOwn }: MessageBubbleProps) {
           }
         `}
       >
-        {/* Message text */}
-        <p className="break-words">{message.text}</p>
+        {/* Message text/file */}
+        {message.fileUrl && (
+          <div className="mb-2 overflow-hidden rounded-md">
+            {message.fileType === "IMAGE" || message.fileType?.includes("image") ? (
+              <img 
+                src={message.fileUrl} 
+                alt="Attachment" 
+                className="max-w-full sm:max-w-[300px] rounded-lg object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              />
+            ) : (
+              <a 
+                href={message.fileUrl} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className={`flex items-center gap-2 p-3 rounded-lg hover:bg-black/20 transition text-sm ${isOwn ? "bg-black/10" : "bg-black/20"}`}
+              >
+                <span>📎</span>
+                <span className="underline truncate">Download File</span>
+              </a>
+            )}
+          </div>
+        )}
+
+        {message.text && (
+          <p className="break-words whitespace-pre-wrap">{message.text}</p>
+        )}
 
         {/* Timestamp + status */}
         <div

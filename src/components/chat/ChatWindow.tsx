@@ -128,9 +128,7 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket 
         if (inputValue.trim()) formData.append("body", inputValue);
         formData.append("file", selectedFile);
 
-        await api.post("/messages/send-file", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.post("/messages/send-file", formData);
       } else {
         await api.post("/messages/send-text", {
           conversationId,
@@ -244,6 +242,8 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket 
                    text: msg.body || "",
                    timestamp: msg.createdAt,
                    status: "read",
+                   fileUrl: msg.fileUrl ? `http://localhost:5000/${msg.fileUrl.replace(/\\/g, '/')}` : null,
+                   fileType: msg.fileType,
                  }}
                  isOwn={isMe}
                />

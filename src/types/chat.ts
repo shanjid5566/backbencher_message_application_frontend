@@ -14,6 +14,8 @@ export interface Message {
   text: string;
   timestamp: string; // ISO string
   status?: "sent" | "delivered" | "read";
+  fileUrl?: string | null;
+  fileType?: string | null;
 }
 
 export interface Conversation {
