@@ -8,9 +8,14 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import EmptyChat from "@/components/chat/EmptyChat";
 import Avatar from "@/components/ui/Avatar";
 import { LogOut } from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { useSocket } from "@/hooks/useSocket";
 
 export default function ChatPage() {
   const router = useRouter();
+  const { data: session } = authClient.useSession();
+  useSocket(session?.user?.id);
+
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
   // mobile: "sidebar" | "window"
   const [mobileView, setMobileView] = useState<"sidebar" | "window">(
@@ -77,9 +82,9 @@ export default function ChatPage() {
           ${mobileView === "sidebar" ? "hidden" : "flex"} md:flex
         `}
       >
-        {activeConversation ? (
+        {activeConvId ? (
           <ChatWindow
-            conversation={activeConversation}
+            conversationId={activeConvId}
             onBack={handleBack}
           />
         ) : (
