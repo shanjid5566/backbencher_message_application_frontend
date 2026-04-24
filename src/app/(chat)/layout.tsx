@@ -139,9 +139,8 @@ export default function ChatLayout({
   const handleSelectConversation = (id: string) => {
     setSelectedConversationId(id);
     // Hide sidebar on mobile when conversation is selected
-    if (typeof window !== "undefined" && window.innerWidth < 768) {
-      setShowSidebarOnMobile(false);
-    }
+    // This will be handled by the responsive classes and state
+    setShowSidebarOnMobile(false);
   };
 
   const handleBack = () => {
