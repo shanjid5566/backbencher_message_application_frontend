@@ -1,10 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { User } from "@/types/chat";
 
 interface AvatarProps {
-  user: User;
+  user: any; // User type flexibility for both formats (user.image and user.avatarUrl)
   size?: "sm" | "md" | "lg" | "xl";
   showStatus?: boolean;
   className?: string;
@@ -30,6 +29,16 @@ export default function Avatar({
   showStatus = false,
   className = "",
 }: AvatarProps) {
+  
+  // 💡 Helper function to format image URL correctly (fixes the 404 error)
+  const getImageUrl = (imagePath?: string | null, fallbackName?: string) => {
+    if (!imagePath) return `https://ui-avatars.com/api/?name=${fallbackName || "User"}&background=random`;
+    if (imagePath.startsWith("http")) return imagePath;
+    return `http://localhost:5000/${imagePath.replace(/\\/g, "/")}`;
+  };
+
+  const finalImageUrl = getImageUrl(user?.avatarUrl || user?.image, user?.name);
+
   return (
     <div className={`relative flex-shrink-0 ${sizeCls[size]} ${className}`}>
       {/* Avatar Image */}
@@ -37,8 +46,8 @@ export default function Avatar({
         className={`${sizeCls[size]} rounded-full overflow-hidden bg-slate-700 ring-2 ring-slate-700`}
       >
         <Image
-          src={user.avatarUrl}
-          alt={user.name}
+          src={finalImageUrl}
+          alt={user?.name || "User Avatar"} // 🔴 Fixes the missing "alt" property error
           width={56}
           height={56}
           className="w-full h-full object-cover"
@@ -52,9 +61,9 @@ export default function Avatar({
           className={`
             absolute bottom-0 right-0 rounded-full border-surface-900
             ${dotSizeCls[size]}
-            ${user.isOnline ? "bg-online border-[#0b0d14]" : "bg-surface-600 border-[#0b0d14]"}
+            ${user?.isOnline ? "bg-online border-[#0b0d14]" : "bg-surface-600 border-[#0b0d14]"}
           `}
-          aria-label={user.isOnline ? "Online" : "Offline"}
+          aria-label={user?.isOnline ? "Online" : "Offline"}
         />
       )}
     </div>
