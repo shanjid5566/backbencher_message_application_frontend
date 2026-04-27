@@ -349,11 +349,6 @@ export const useVideoCall = (
       endCall(false, true);
     });
     socket.on("call_missed", () => {
-      if (!isCallerRef.current && onLogCallRef.current) {
-        onLogCallRef.current(
-          `Missed ${callTypeRef.current === "VIDEO" ? "Video" : "Audio"} call`,
-        );
-      }
       endCall(false, false);
     });
     socket.on("call_ended", () => endCall(false));
@@ -426,9 +421,8 @@ export const useVideoCall = (
       toId: partnerIdRef.current,
     });
     if (onLogCallRef.current)
-      onLogCallRef.current(
-        `Missed ${callTypeRef.current === "VIDEO" ? "Video" : "Audio"} call`,
-      );
+      // Note: We remove the log from here because endCall will handle the caller side.
+      // And we want only one side to log.
     setCallerInfo(null);
     endCall(false, true);
   };
@@ -440,7 +434,7 @@ export const useVideoCall = (
     const type = callTypeRef.current;
     const pId = partnerIdRef.current;
 
-    // Send Call Data from the Caller side
+    // Send Call Data from the Caller side ONLY to avoid duplicates
     if (isCallerRef.current && onLogCallRef.current) {
       const status = isRejected || duration === 0 ? "MISSED" : "COMPLETED";
       if (status === "MISSED") {
@@ -457,19 +451,8 @@ export const useVideoCall = (
           { type, duration, status, partnerId: pId },
         );
       }
-    } else if (
-      !isCallerRef.current &&
-      !isRejected &&
-      duration > 0 &&
-      onLogCallRef.current
-    ) {
-      const m = Math.floor(duration / 60);
-      const s = duration % 60;
-      const timeStr = m > 0 ? `${m}m ${s}s` : `${s}s`;
-      onLogCallRef.current(
-        `${type === "VIDEO" ? "Video" : "Audio"} call \u2022 ${timeStr}`,
-      );
-    }
+    } 
+    // Receiver side logging removed to prevent duplication in shared conversation
 
     if (emitToSocket && partnerIdRef.current)
       socket.emit("end_call", {
