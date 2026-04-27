@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { X, Ban, Image as ImageIcon, FileText, Loader2, CheckCircle } from "lucide-react";
@@ -17,8 +17,8 @@ export default function ChatDetailsModal({ isOpen, onClose, partner, conversatio
   const [mediaFiles, setMediaFiles] = useState<any[]>([]);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
   
-  // Block/Unblock State
-  const [isBlocked, setIsBlocked] = useState(false); // (বাস্তবে এটা ব্যাকএন্ড থেকে ইনিশিয়াল স্ট্যাটাস হিসেবে আসবে)
+  // Block/Unblock State (in reality, this will come from the backend as initial status)
+  const [isBlocked, setIsBlocked] = useState(false); // (In practice, this will come from backend)
   const [isBlocking, setIsBlocking] = useState(false);
 
   useEffect(() => {

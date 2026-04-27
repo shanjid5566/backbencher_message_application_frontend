@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef } from "react";
-import { X, Camera, Loader2, Save, Lock, User, Eye, EyeOff } from "lucide-react"; // 👈 Eye, EyeOff যোগ করা হলো
+import { X, Camera, Loader2, Save, Lock, User, Eye, EyeOff } from "lucide-react"; // Eye, EyeOff added
 import api from "@/lib/axios";
 
 interface SettingsModalProps {
@@ -21,9 +21,9 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
   // Security States
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // 👈 Confirm Password State
+  const [confirmPassword, setConfirmPassword] = useState(""); // Confirm Password State
 
-  // Eye Button States (পাসওয়ার্ড শো/হাইড করার জন্য)
+  // Eye Button States (for showing/hiding password)
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
@@ -65,7 +65,7 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
     e.preventDefault();
     setMessage({ type: "", text: "" });
 
-    // 🔴 ফ্রন্টএন্ড ভ্যালিডেশন: পাসওয়ার্ড মিলছে কি না চেক করা
+    // Frontend validation: check if passwords match
     if (newPassword !== confirmPassword) {
       setMessage({ type: "error", text: "New passwords do not match!" });
       return;
@@ -80,7 +80,7 @@ export default function SettingsModal({ isOpen, onClose, user }: SettingsModalPr
       setNewPassword("");
       setConfirmPassword("");
       
-      // পাসওয়ার্ড হাইড করে দেওয়া
+      // Hide password fields
       setShowCurrent(false);
       setShowNew(false);
       setShowConfirm(false);

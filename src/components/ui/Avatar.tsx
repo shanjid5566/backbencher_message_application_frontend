@@ -30,7 +30,7 @@ export default function Avatar({
   className = "",
 }: AvatarProps) {
   
-  // 💡 Helper function to format image URL correctly (fixes the 404 error)
+  // Helper function to format image URL correctly (fixes the 404 error)
   const getImageUrl = (imagePath?: string | null, fallbackName?: string) => {
     if (!imagePath) return `https://ui-avatars.com/api/?name=${fallbackName || "User"}&background=random`;
     if (imagePath.startsWith("http")) return imagePath;
@@ -47,7 +47,7 @@ export default function Avatar({
       >
         <Image
           src={finalImageUrl}
-          alt={user?.name || "User Avatar"} // 🔴 Fixes the missing "alt" property error
+          alt={user?.name || "User Avatar"} // Fixes the missing "alt" property error
           width={56}
           height={56}
           className="w-full h-full object-cover"

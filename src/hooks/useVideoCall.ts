@@ -18,7 +18,7 @@
 //   const [partnerId, setPartnerId] = useState<string | null>(null);
 //   const [callType, setCallType] = useState<'VIDEO' | 'AUDIO'>('VIDEO');
 //   const [activeCallId, setActiveCallId] = useState<string | null>(null);
-//   const [isCaller, setIsCaller] = useState(false); // 👈 নতুন
+//   const [isCaller, setIsCaller] = useState(false); // Flag for call initiation
 //   const callStartTimeRef = useRef<number>(0);
 
 //   // Media Control States
@@ -58,7 +58,7 @@
 
 //     socket.on('incoming_call', (data: { callId: string, fromId: string, fromName: string, callType: 'VIDEO'|'AUDIO' }) => {
 //       if (data.fromId === currentUserId) return;
-//       setIsCaller(false); // 👈
+//       setIsCaller(false); // Flag update
 //       setCallerInfo({ id: data.fromId, name: data.fromName });
 //       setPartnerId(data.fromId);
 //       setCallType(data.callType || 'VIDEO');
@@ -118,7 +118,7 @@
 //   };
 
 //   const initiateCall = async (receiverId: string, type: 'VIDEO' | 'AUDIO' = 'VIDEO', partnerName?: string) => {
-//     setIsCaller(true); // 👈 আমি কল দিচ্ছি
+//     setIsCaller(true); // Call initiation flag
 //     setPartnerId(receiverId);
 //     setCallType(type);
 //     setIsDialing(true);
@@ -169,7 +169,7 @@
 //   const endCall = (emitToSocket = true, isRejected = false) => {
 //     const duration = callStartTimeRef.current ? Math.floor((Date.now() - callStartTimeRef.current) / 1000) : 0;
 
-//     // 🔴 কল লগ মেসেজ তৈরি করা — শুধু caller-এর পক্ষ থেকে (receiver side is handled in rejectCall/call_missed)
+//     // Call log message generation — only from the caller side (receiver side is handled in rejectCall/call_missed)
 //     if (isCaller && onLogCall) {
 //       if (isRejected || duration === 0) {
 //         onLogCall(`Missed ${callType === 'VIDEO' ? 'Video' : 'Audio'} call`);
@@ -257,7 +257,7 @@ export const useVideoCall = (
     name: string;
   } | null>(null);
 
-  // 🔴 UI তে দেখানোর জন্য State
+  // State for UI rendering
   const [callTypeState, setCallTypeState] = useState<"VIDEO" | "AUDIO">(
     "VIDEO",
   );
@@ -265,7 +265,7 @@ export const useVideoCall = (
   const [isAudioMuted, setIsAudioMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
 
-  // 🔴 লজিকের (Stale Closure) জন্য Refs
+  // Refs for logic (Stale Closure avoidance)
   const partnerIdRef = useRef<string | null>(null);
   const activeCallIdRef = useRef<string | null>(null);
   const callTypeRef = useRef<"VIDEO" | "AUDIO">("VIDEO");
@@ -278,7 +278,7 @@ export const useVideoCall = (
   const currentCallRef = useRef<MediaConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
 
-  // 🔴 ম্যাজিক: State এবং Ref দুটোই একসাথে আপডেট করার ফাংশন
+  // Helper: Update both State and Ref simultaneously
   const setCallType = (type: "VIDEO" | "AUDIO") => {
     setCallTypeState(type);
     callTypeRef.current = type;
@@ -327,7 +327,7 @@ export const useVideoCall = (
         partnerIdRef.current = data.fromId;
         activeCallIdRef.current = data.callId;
 
-        setCallType(data.callType || "VIDEO"); // 👈 State ও Ref একসাথে আপডেট
+        setCallType(data.callType || "VIDEO"); // Updates both State and Ref simultaneously
         setCallerInfo({ id: data.fromId, name: data.fromName });
         setIsReceivingCall(true);
       },
@@ -388,7 +388,7 @@ export const useVideoCall = (
   ) => {
     isCallerRef.current = true;
     partnerIdRef.current = receiverId;
-    setCallType(type); // 👈 State ও Ref একসাথে আপডেট
+    setCallType(type); // Updates both State and Ref simultaneously
 
     setIsDialing(true);
     setIsCallAccepted(false);
@@ -440,7 +440,7 @@ export const useVideoCall = (
     const type = callTypeRef.current;
     const pId = partnerIdRef.current;
 
-    // 🔴 Caller এর সাইড থেকে Call Data পাঠানো
+    // Send Call Data from the Caller side
     if (isCallerRef.current && onLogCallRef.current) {
       const status = isRejected || duration === 0 ? "MISSED" : "COMPLETED";
       if (status === "MISSED") {
@@ -525,7 +525,7 @@ export const useVideoCall = (
     callerInfo,
     localVideoRef,
     remoteVideoRef,
-    callType: callTypeState, // 👈 এখন আর Ref.current নয়, সরাসরি State পাঠানো হলো
+    callType: callTypeState, // Return state directly instead of Ref.current
     initiateCall,
     acceptCall,
     rejectCall,

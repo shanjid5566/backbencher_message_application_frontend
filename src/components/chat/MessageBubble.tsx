@@ -35,7 +35,7 @@ function StatusIcon({ status }: { status?: string }) {
 export default function MessageBubble({ message, isOwn, onDeleteForMe, onDeleteForEveryone }: MessageBubbleProps) {
   const [showMenu, setShowMenu] = useState(false);
 
-  // 📞 System Message (Call Log)
+  // System Message (Call Log)
   if (message.type === "CALL_LOG") {
     const isMissed = message.text.includes("Missed");
     return (
@@ -52,10 +52,10 @@ export default function MessageBubble({ message, isOwn, onDeleteForMe, onDeleteF
   return (
     <div className={`flex w-full mb-2 ${isOwn ? "justify-end" : "justify-start"} group`}>
       
-      {/* 🔴 আঁটসাঁট (Tight) কন্টেইনার, এখানেই relative দিতে হবে */}
+      {/* Tight container, relative position goes here */}
       <div className="relative max-w-[72%] sm:max-w-[60%] flex">
 
-        {/* 🔴 Delete Menu (Three Dot) - এখন এটি ঠিক বাবলের পাশে থাকবে */}
+        {/* Delete Menu (Three Dot) - now positioned right next to the bubble */}
         <div className={`absolute top-1 ${isOwn ? "-left-10" : "-right-10"} opacity-0 group-hover:opacity-100 transition-opacity z-20`}>
           <div className="relative">
             <button 
