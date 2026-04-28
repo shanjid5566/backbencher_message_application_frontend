@@ -7,7 +7,7 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import EmptyChat from "@/components/chat/EmptyChat";
 import Avatar from "@/components/ui/Avatar";
 import { LogOut, History, Settings } from "lucide-react";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
 import api from "@/lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
@@ -19,8 +19,8 @@ import { useVideoCall } from "@/hooks/useVideoCall";
 
 export default function ChatPage() {
   const router = useRouter();
-  const { data: session } = authClient.useSession();
-  const socket = useSocket(session?.user?.id);
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const socket = useSocket(user?.id);
   const queryClient = useQueryClient();
 
   const [activeConvId, setActiveConvId] = useState<string | null>(null);
@@ -36,10 +36,10 @@ export default function ChatPage() {
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!session?.user?.id) {
+    if (!isLoading && !isAuthenticated) {
       router.push("/login");
     }
-  }, [session?.user?.id, router]);
+  }, [isAuthenticated, isLoading, router]);
 
   const handleSelectConversation = (id: string, partnerId?: string) => {
     setActiveConvId(id);
@@ -118,7 +118,7 @@ export default function ChatPage() {
     toggleVideo,
     isAudioMuted,
     isVideoOff,
-  } = useVideoCall(socket, session?.user?.id, session?.user?.name, handleLogCall);
+  } = useVideoCall(socket, user?.id, user?.name, handleLogCall);
 
   // When a call is incoming, store the caller as the active partner so we can
   // log the missed call message even if the user hasn't opened that conversation.
@@ -149,7 +149,7 @@ export default function ChatPage() {
       />
 
       <CallHistoryModal isOpen={isCallHistoryOpen} onClose={() => setIsCallHistoryOpen(false)} />
-      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={session?.user} />
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} user={user} />
 
       {/* ══════════════════════════════════════════
           LEFT SIDEBAR
@@ -161,12 +161,12 @@ export default function ChatPage() {
 
         <div className="flex items-center gap-3 px-4 py-3 bg-surface-900 border-t border-r border-surface-700/50">
           <Avatar
-            user={{ ...session?.user, avatarUrl: session?.user?.image || `https://ui-avatars.com/api/?name=${session?.user?.name}&background=random` } as any}
+            user={{ ...user, avatarUrl: user?.image || `https://ui-avatars.com/api/?name=${user?.name}&background=random` } as any}
             size="sm"
             showStatus
           />
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-white truncate">{session?.user?.name}</p>
+            <p className="text-sm font-semibold text-white truncate">{user?.name}</p>
             <p className="text-[11px] text-online">Online</p>
           </div>
 
@@ -178,7 +178,7 @@ export default function ChatPage() {
             <History size={15} />
           </button>
 
-          <button onClick={() => router.push("/login")} className="w-7 h-7 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors text-surface-400 hover:text-red-400" aria-label="Log out">
+          <button onClick={() => logout()} className="w-7 h-7 rounded-full hover:bg-surface-700 flex items-center justify-center transition-colors text-surface-400 hover:text-red-400" aria-label="Log out">
             <LogOut size={14} />
           </button>
         </div>
