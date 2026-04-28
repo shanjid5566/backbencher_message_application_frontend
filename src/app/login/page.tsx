@@ -21,6 +21,7 @@ export default function LoginPage() {
     
     try {
       // Step 1: Login with Better Auth
+      console.log("📝 Attempting login...");
       const { data, error } = await authClient.signIn.email({
         email,
         password,
@@ -35,15 +36,16 @@ export default function LoginPage() {
 
       console.log("✅ Login successful");
 
-      // Step 2: Get token from backend
+      // Step 2: Get token from backend (using email-based endpoint, no cookies needed)
       console.log("🔑 Fetching token...");
       const tokenResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/get-token`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/get-token-verified`,
         {
-          credentials: "include",
+          method: "POST",  // Changed from GET to POST
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({ email }),  // Send email to verify and get token
         }
       );
 
@@ -53,19 +55,21 @@ export default function LoginPage() {
 
       const tokenData = await tokenResponse.json();
 
-      if (tokenData.token) {
+      if (tokenData.success && tokenData.token) {
         // Step 3: Store token in localStorage
         localStorage.setItem("authToken", tokenData.token);
         if (tokenData.user) {
           localStorage.setItem("user", JSON.stringify(tokenData.user));
         }
         console.log("✅ Token stored successfully");
-      }
 
-      // Redirect to dashboard
-      setTimeout(() => {
-        router.push("/");
-      }, 500);
+        // Redirect to dashboard
+        setTimeout(() => {
+          router.push("/");
+        }, 500);
+      } else {
+        throw new Error(tokenData.message || "Failed to get authentication token");
+      }
     } catch (err: any) {
       console.error("❌ Login error:", err);
       setErrorMsg(err.message || "Login failed. Please try again.");
