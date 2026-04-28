@@ -61,7 +61,7 @@ export default function ChatSidebar({ activeId, onSelect, socket }: ChatSidebarP
   const getImageUrl = (imagePath?: string | null, fallbackName?: string) => {
     if (!imagePath) return `https://ui-avatars.com/api/?name=${fallbackName || "User"}&background=random`;
     if (imagePath.startsWith("http")) return imagePath;
-    return `http://localhost:5000/${imagePath.replace(/\\/g, "/")}`;
+    return `${process.env.NEXT_PUBLIC_API_URL}/${imagePath.replace(/\\/g, "/")}`;
   };
 
   return (

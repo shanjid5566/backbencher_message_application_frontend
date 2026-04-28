@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ChatSidebar from "@/components/chat/ChatSidebar";
 import ChatWindow from "@/components/chat/ChatWindow";
@@ -33,6 +33,13 @@ export default function ChatPage() {
 
   const [isCallHistoryOpen, setIsCallHistoryOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!session?.user?.id) {
+      router.push("/login");
+    }
+  }, [session?.user?.id, router]);
 
   const handleSelectConversation = (id: string, partnerId?: string) => {
     setActiveConvId(id);

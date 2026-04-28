@@ -193,7 +193,7 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket,
   const getImageUrl = (imagePath?: string | null, fallbackName?: string) => {
     if (!imagePath) return `https://ui-avatars.com/api/?name=${fallbackName || "User"}&background=random`;
     if (imagePath.startsWith("http")) return imagePath;
-    return `http://localhost:5000/${imagePath.replace(/\\/g, "/")}`;
+    return `${process.env.NEXT_PUBLIC_API_URL}/${imagePath.replace(/\\/g, "/")}`;
   };
 
   return (
@@ -267,7 +267,7 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket,
                    text: msg.body || "", 
                    timestamp: msg.createdAt, 
                    status: msg.status, 
-                   fileUrl: msg.fileUrl ? `http://localhost:5000/${msg.fileUrl.replace(/\\/g, '/')}` : null, 
+                   fileUrl: msg.fileUrl ? `${process.env.NEXT_PUBLIC_API_URL}/${msg.fileUrl.replace(/\\/g, '/')}` : null, 
                    fileType: msg.fileType,
                    type: msg.type 
                  }}

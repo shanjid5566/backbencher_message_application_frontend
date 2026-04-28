@@ -31,7 +31,10 @@ export default function LoginPage() {
         setErrorMsg("Invalid email or password! (" + error.message + ")");
     } else {
         console.log("Login Success:", data);
-        router.push("/");
+        // Add small delay to ensure session is persisted
+        setTimeout(() => {
+          router.push("/");
+        }, 500);
     }
   };
 
