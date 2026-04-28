@@ -23,7 +23,7 @@ export default function ForgotPasswordPage() {
 
     try {
       // Better Auth will send an email with a token attached to this redirect URL
-      const { error } = await authClient.forgetPassword({
+      const { error } = await (authClient as any).forgetPassword({
         email,
         redirectTo: "/reset-password", 
       });

@@ -10,16 +10,19 @@ interface ChatDetailsModalProps {
   onClose: () => void;
   partner: any;
   conversationId: string;
+  blockStatus: { iBlockedThem: boolean; theyBlockedMe: boolean };
+  setBlockStatus: (status: any) => void;
 }
 
-export default function ChatDetailsModal({ isOpen, onClose, partner, conversationId }: ChatDetailsModalProps) {
+export default function ChatDetailsModal({ isOpen, onClose, partner, conversationId, blockStatus, setBlockStatus }: ChatDetailsModalProps) {
   const [activeTab, setActiveTab] = useState<"media" | "options">("media");
   const [mediaFiles, setMediaFiles] = useState<any[]>([]);
   const [isLoadingMedia, setIsLoadingMedia] = useState(false);
   
-  // Block/Unblock State (in reality, this will come from the backend as initial status)
-  const [isBlocked, setIsBlocked] = useState(false); // (In practice, this will come from backend)
+  // Local state for UI loading during block action
   const [isBlocking, setIsBlocking] = useState(false);
+  
+  const isBlocked = blockStatus.iBlockedThem;
 
   useEffect(() => {
     if (isOpen && activeTab === "media") {
@@ -44,10 +47,10 @@ export default function ChatDetailsModal({ isOpen, onClose, partner, conversatio
     try {
       if (isBlocked) {
         await api.post("/users/unblock", { targetUserId: partner.id });
-        setIsBlocked(false);
+        setBlockStatus((prev: any) => ({ ...prev, iBlockedThem: false }));
       } else {
         await api.post("/users/block", { targetUserId: partner.id });
-        setIsBlocked(true);
+        setBlockStatus((prev: any) => ({ ...prev, iBlockedThem: true }));
       }
     } catch (error) {
       console.error("Failed to toggle block status", error);

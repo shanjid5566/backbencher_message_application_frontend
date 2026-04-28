@@ -159,8 +159,9 @@ export default function ChatSidebar({ activeId, onSelect, socket }: ChatSidebarP
               const partner = conv.users[0];
               
               let lastMessageBody = conv.messages[0]?.body || "Started a conversation";
-              if (conv.messages[0]?.type === "CALL_LOG") lastMessageBody = "📞 " + lastMessageBody;
-              else if (conv.messages[0]?.fileUrl) lastMessageBody = "📎 Attachment";
+              const firstMsg = conv.messages[0] as any;
+              if (firstMsg?.type === "CALL_LOG") lastMessageBody = "📞 " + lastMessageBody;
+              else if (firstMsg?.fileUrl) lastMessageBody = "📎 Attachment";
 
               if (!partner) return null;
 

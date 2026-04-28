@@ -32,7 +32,7 @@ export default function SignUpPage() {
 
     if (error) {
         console.error("Signup Failed:", error.message);
-        setErrorMsg(error.message);
+        setErrorMsg(error.message || "Something went wrong. Please try again.");
     } else {
         console.log("Signup Success:", data);
         setSuccessMsg("Account created successfully! Redirecting to login...");
