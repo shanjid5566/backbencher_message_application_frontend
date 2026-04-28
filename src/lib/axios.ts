@@ -11,7 +11,10 @@ api.interceptors.request.use(
     try {
       const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
       if (token) {
+        console.log('📤 Adding token to request:', token.substring(0, 20) + '...');
         config.headers.Authorization = `Bearer ${token}`;
+      } else {
+        console.warn('⚠️ No token found in localStorage');
       }
     } catch (error) {
       console.error('Error reading token:', error);

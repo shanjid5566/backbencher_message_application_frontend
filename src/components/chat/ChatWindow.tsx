@@ -6,7 +6,7 @@ import Avatar from "@/components/ui/Avatar";
 import { ArrowLeft, Phone, Video, Paperclip, Smile, Send, MoreHorizontal, Loader2 } from "lucide-react";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { useMessages } from "@/hooks/useMessages";
-import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/axios";
 import { useQueryClient } from "@tanstack/react-query";
 import { useConversations } from "@/hooks/useConversations";
@@ -23,7 +23,7 @@ interface ChatWindowProps {
 }
 
 export default function ChatWindow({ conversationId, receiverId, onBack, socket, onStartVideoCall, onStartAudioCall }: ChatWindowProps) {
-  const { data: session } = authClient.useSession();
+  const { user } = useAuth();
   const { data: messages, isLoading } = useMessages(conversationId);
   const { data: conversations } = useConversations();
   const queryClient = useQueryClient();
@@ -90,7 +90,7 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket,
       if (data.conversationId === conversationId) {
         queryClient.setQueryData(["messages", conversationId], (old: any) => {
           if (!old) return old;
-          return old.map((msg: any) => (msg.sender?.id === session?.user?.id ? { ...msg, status: "SEEN" } : msg));
+          return old.map((msg: any) => (msg.sender?.id === user?.id ? { ...msg, status: "SEEN" } : msg));
         });
       }
     };
@@ -127,22 +127,22 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket,
       socket.off("user_stopped_typing", handleStopTyping);
       socket.off("block_update", handleBlockUpdate);
     };
-  }, [socket, conversationId, queryClient, receiverId, session?.user?.id]);
+  }, [socket, conversationId, queryClient, receiverId, user?.id]);
 
   useEffect(() => {
     if (messages && messages.length > 0 && receiverId) {
-      const unseenMessages = messages.filter((m: any) => m.status !== "SEEN" && m.sender?.id !== session?.user?.id);
+      const unseenMessages = messages.filter((m: any) => m.status !== "SEEN" && m.sender?.id !== user?.id);
       if (unseenMessages.length > 0) {
         api.patch("/messages/seen", { conversationId }).then(() => {
           socket.emit("mark_as_seen", { conversationId, receiverId });
           queryClient.setQueryData(["messages", conversationId], (old: any) => {
             if (!old) return old;
-            return old.map((msg: any) => msg.sender?.id !== session?.user?.id ? { ...msg, status: "SEEN" } : msg);
+            return old.map((msg: any) => msg.sender?.id !== user?.id ? { ...msg, status: "SEEN" } : msg);
           });
         });
       }
     }
-  }, [messages, conversationId, receiverId, session?.user?.id, socket, queryClient]);
+  }, [messages, conversationId, receiverId, user?.id, socket, queryClient]);
 
   if (!conversationId) return <EmptyChat />;
 
@@ -257,7 +257,7 @@ export default function ChatWindow({ conversationId, receiverId, onBack, socket,
           </div>
         ) : (
           messages?.map((msg: any) => {
-             const isMe = msg.sender?.id === session?.user?.id;
+             const isMe = msg.sender?.id === user?.id;
              return (
                <MessageBubble
                  key={msg.id}
