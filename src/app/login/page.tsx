@@ -38,7 +38,7 @@ export default function LoginPage() {
       // Step 2: Get token from backend
       console.log("🔑 Fetching token...");
       const tokenResponse = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/get-token`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/get-token`,
         {
           credentials: "include",
           headers: {
